@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#332972">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Perpustakaan - SD Al Basyir</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="pageStyle">@page{size:A4 portrait;margin:12mm}</style>
+<style>
+body{font-family:'Quicksand',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+.noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
+.sheet{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.seg{flex:1;padding:10px;border-radius:12px;font-size:14px;font-weight:800;color:#94a3b8;background:#f1f5f9}
+.seg.on{background:#10b981;color:#fff}.seg.off.on{background:#f43f5e}
+#printArea table{width:100%;table-layout:fixed;border-collapse:collapse;margin-bottom:12px}
+#printArea th,#printArea td{border:1px solid #777;padding:4px 6px;overflow-wrap:anywhere;font-size:10.5px;vertical-align:middle}
+#printArea th{background:#eceef3;font-weight:800;text-align:center}
+#printArea tr{break-inside:avoid}#printArea thead{display:table-header-group}
+@media print{
+#app,#nav,#fab,#sheetWrap,#toast{display:none!important}
+body{background:#fff!important}
+#printModal{position:static!important;display:block!important;background:none!important}
+#printModal>div:not(#pvWrap){display:none!important}
+#pvWrap{overflow:visible!important;padding:0!important}
+#printArea{zoom:1!important;width:100%!important;min-height:0!important;padding:0!important;margin:0!important;box-shadow:none!important}
+}
+</style>
+<style type="text/tailwindcss">
+.inp{@apply w-full text-sm font-semibold bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-slate-700 focus:outline-none focus:border-sky-400 focus:bg-white}
+.lbl{@apply block text-xs font-extrabold text-slate-500 mb-1 ml-1}
+.btn-p{@apply px-5 py-3 text-white rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 active:scale-95 transition}
+.btn-o{@apply px-5 py-3 bg-white border-2 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 active:scale-95 transition}
+.card{@apply bg-white rounded-3xl p-4}
+.chip{@apply flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-extrabold border-2 border-slate-200 bg-white text-slate-500}
+.nb{@apply flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-extrabold text-slate-400}
+</style>
+<style>
+/* ===== TEMA 3D (warna logo: #219bdc & #332972) ===== */
+body{background:linear-gradient(180deg,#cfe8f7,#eaf4fb 45%,#f3f0ff)!important}
+#app{background:#f4f9fd!important}
+header.sticky,#printModal>div:first-child{background:linear-gradient(135deg,#332972,#219bdc)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.28),0 8px 0 -3px rgba(51,41,114,.3),0 18px 28px -8px rgba(51,41,114,.5)!important}
+.card{background:linear-gradient(180deg,#fff,#f4f9ff)!important;border:1px solid #e0edf8!important;box-shadow:inset 0 2px 0 #fff,0 6px 0 -1px #cfe3f2,0 16px 24px -12px rgba(51,41,114,.3)!important;transition:transform .25s,box-shadow .25s;animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+.card:hover{transform:translateY(-3px)}
+.card:active{transform:translateY(3px);box-shadow:inset 0 2px 0 #fff,0 2px 0 -1px #cfe3f2!important}
+.btn-p{background:linear-gradient(180deg,#46b5ee,#219bdc 55%,#1b83bd)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 5px 0 #332972,0 12px 16px -6px rgba(51,41,114,.5)!important;transition:transform .12s,box-shadow .12s}
+.btn-p:active{transform:translateY(4px)!important;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 1px 0 #332972!important}
+.btn-o{color:#332972!important;border-color:#bcdcf0!important;box-shadow:0 4px 0 #cfe3f2;transition:transform .12s,box-shadow .12s}
+.btn-o:active{transform:translateY(3px)!important;box-shadow:0 1px 0 #cfe3f2!important}
+.chip{box-shadow:0 3px 0 #e2e8f0;transition:transform .15s}.chip:active{transform:translateY(2px)}
+.chip.on{background:#332972!important;border-color:#332972!important;color:#fff!important;box-shadow:0 4px 0 #1d1752!important}
+.nb.on{color:#219bdc!important}.nb.on svg{animation:bob 1.6s ease-in-out infinite}
+.nb.on::after{content:"";width:18px;height:4px;border-radius:9px;background:#219bdc;margin-top:1px}
+#fab button{background:linear-gradient(180deg,#46b5ee,#219bdc 55%,#1b83bd)!important;box-shadow:inset 0 3px 0 rgba(255,255,255,.4),0 6px 0 #332972,0 16px 22px -6px rgba(51,41,114,.55)!important;animation:float 2.6s ease-in-out infinite}
+#fab button:active{animation:none;transform:translateY(5px);box-shadow:0 1px 0 #332972!important}
+.text-violet-600{color:#219bdc!important}.text-violet-700{color:#332972!important}
+.inp{transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:#219bdc!important;box-shadow:0 4px 0 #daedf6!important}
+.seg{box-shadow:0 3px 0 #e2e8f0}
+.drive-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:linear-gradient(180deg,#fff,#eef7fd);border:2px solid #bcdcf0;box-shadow:0 4px 0 #cfe3f2;color:#332972;font-weight:800;font-size:13px;transition:transform .12s,box-shadow .12s}
+.drive-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #cfe3f2}
+.drive-btn .ico,.dv{width:40px;height:40px;border-radius:14px;background:linear-gradient(180deg,#46b5ee,#219bdc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 3px 0 #332972;transition:transform .12s,box-shadow .12s}
+.dv{width:36px;height:36px;border-radius:12px}.dv:active{transform:translateY(3px);box-shadow:0 0 0 #332972}
+.drive-btn:hover .ico,.dv:hover{animation:bob .6s ease-in-out}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.97)}}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@keyframes float{50%{transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="min-h-screen text-slate-800">
+<div id="app" class="max-w-xl mx-auto min-h-screen shadow-2xl relative pb-32">
+<header class="sticky top-0 z-20 text-white px-4 pb-4 rounded-b-3xl" style="padding-top:max(env(safe-area-inset-top),.75rem)">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-2xl bg-white p-1 flex-shrink-0 flex items-center justify-center"><img alt="Logo" class="max-h-full max-w-full object-contain" id="logoImg" onerror="this.onerror=null;this.src='logo.png'" src="data:image/png;base64,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"></div>
+<div class="flex-1 min-w-0"><div class="text-[10px] font-bold opacity-80 uppercase tracking-wider">SD Al Basyir · TA 2026/2027</div><h1 id="title" class="text-lg font-extrabold leading-tight">Kunjungan</h1></div>
+<div class="w-10 h-10 rounded-full bg-white/20 border-2 border-white/60 flex items-center justify-center font-extrabold text-sm">FN</div>
+</div>
+<p class="text-[11px] mt-2 opacity-90 truncate">Farasita Nurmahfudzah, S.Hum., Gr. · Staf Perpustakaan</p>
+</header>
+<main class="px-4 pt-4">
+<section id="p-visit" class="space-y-3">
+<div class="grid grid-cols-3 gap-2.5 text-center">
+<div class="card !p-3"><div class="text-2xl font-black text-violet-600" id="sToday">0</div><div class="text-[10px] font-extrabold text-slate-400 uppercase">Hari ini</div></div>
+<div class="card !p-3"><div class="text-2xl font-black text-emerald-500" id="sHadir">0</div><div class="text-[10px] font-extrabold text-slate-400 uppercase">Hadir</div></div>
+<div class="card !p-3"><div class="text-2xl font-black text-amber-500" id="sItems">0</div><div class="text-[10px] font-extrabold text-slate-400 uppercase">Inventaris</div></div>
+</div>
+<input id="fSearch" class="inp !rounded-full" placeholder="Cari nama siswa..." oninput="q=this.value.trim().toLowerCase();renderVisitors()">
+<div id="chips" class="flex gap-2 overflow-x-auto noscroll -mx-4 px-4 pb-1"></div>
+<div class="text-xs font-extrabold text-slate-400 px-1" id="visCount"></div>
+<div id="visList" class="space-y-2.5"></div>
+</section>
+<section id="p-inv" class="hidden space-y-3">
+<div class="card !border-0 text-white" style="background:linear-gradient(135deg,#219bdc,#332972)!important"><div class="text-xs font-extrabold opacity-90 uppercase">Total Aset / Inventaris</div><div class="text-3xl font-black" id="iTot">0</div></div>
+<div id="invList" class="space-y-2.5"></div>
+</section>
+<section id="p-rep" class="hidden space-y-3">
+<div class="card"><h3 class="font-extrabold text-sm mb-3">Ringkasan Laporan</h3>
+<div class="grid grid-cols-4 gap-2 text-center">
+<div><div class="text-xl font-black text-violet-600" id="rTot">0</div><div class="text-[10px] font-bold text-slate-400">Kunjungan</div></div>
+<div><div class="text-xl font-black text-emerald-500" id="rHadir">0</div><div class="text-[10px] font-bold text-slate-400">Hadir</div></div>
+<div><div class="text-xl font-black text-rose-500" id="rTidak">0</div><div class="text-[10px] font-bold text-slate-400">Tidak</div></div>
+<div><div class="text-xl font-black text-amber-500" id="rItems">0</div><div class="text-[10px] font-bold text-slate-400">Barang</div></div>
+</div></div>
+<div class="card space-y-3">
+<h3 class="font-extrabold text-sm">Cetak &amp; Unduh <span class="text-violet-600">LAPORAN DIV. PERPUSTAKAAN</span></h3>
+<div class="grid grid-cols-2 gap-3">
+<div><label class="lbl">Ukuran Kertas</label><select class="inp" id="paperSize" onchange="updatePrint(this)"><option value="A4">A4</option><option value="F4">F4 / Folio</option></select></div>
+<div><label class="lbl">Orientasi</label><select class="inp" id="paperOri" onchange="updatePrint(this)"><option value="portrait">Potret</option><option value="landscape">Lanskap</option></select></div>
+</div>
+<button class="btn-p w-full" onclick="openPrint()">Pratinjau &amp; Cetak</button>
+<div class="grid grid-cols-2 gap-3"><button class="btn-o" onclick="downloadPDF()">Unduh PDF</button><button class="btn-o" onclick="downloadDocx()">Unduh Word</button></div>
+</div>
+<a class="card flex items-center gap-3" href="https://drive.google.com/drive/folders/1x9htrwbfRa6OvPnz5ffIdTIWyHT4cQSv" target="_blank" rel="noopener noreferrer">
+<div class="dv !w-11 !h-11" data-drive></div>
+<div class="flex-1"><div class="font-extrabold text-sm">Dokumentasi Kegiatan</div><div class="text-xs text-slate-400 font-semibold">Buka folder Google Drive</div></div></a>
+</section>
+</main>
+</div>
+<div id="fab" class="fixed bottom-24 inset-x-0 z-30 pointer-events-none"><div class="max-w-xl mx-auto px-5 flex justify-end">
+<button class="pointer-events-auto w-14 h-14 rounded-full text-white flex items-center justify-center text-3xl font-black" onclick="openSheet(tab==='visit'?'visit':'item')" aria-label="Tambah">+</button>
+</div></div>
+<nav id="nav" class="fixed bottom-0 inset-x-0 z-30"><div class="max-w-xl mx-auto bg-white/95 backdrop-blur border-t border-slate-100 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,.08)] grid grid-cols-3" style="padding-bottom:env(safe-area-inset-bottom)">
+<button class="nb" id="n-visit" onclick="go('visit')"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Kunjungan</button>
+<button class="nb" id="n-inv" onclick="go('inv')"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7"/></svg>Inventaris</button>
+<button class="nb" id="n-rep" onclick="go('rep')"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v4h4"/></svg>Laporan</button>
+</div></nav>
+<div id="sheetWrap" class="fixed inset-0 z-40 hidden">
+<div class="absolute inset-0 bg-slate-900/50" onclick="closeSheet()"></div>
+<div id="sheet" class="sheet absolute bottom-0 inset-x-0 max-w-xl mx-auto bg-white rounded-t-3xl p-5 max-h-[92vh] overflow-y-auto translate-y-full" style="padding-bottom:max(env(safe-area-inset-bottom),1.5rem)">
+<div class="w-10 h-1.5 bg-slate-300 rounded-full mx-auto mb-4"></div>
+<form id="fVisit" class="space-y-3 hidden" onsubmit="addVisitor(event)">
+<h3 class="font-extrabold text-base">Tambah Kunjungan</h3>
+<div class="grid grid-cols-2 gap-3">
+<div><label class="lbl">Kelas</label><select class="inp" id="selClass" onchange="fillStudents()"></select></div>
+<div><label class="lbl">Tanggal</label><input class="inp" id="inDate" type="date"></div>
+</div>
+<div><label class="lbl">Nama Lengkap (otomatis sesuai kelas)</label><select class="inp" id="selStudent"></select></div>
+<div><label class="lbl">Status Kehadiran</label>
+<div class="flex gap-2"><button type="button" class="seg on" id="sgH" onclick="setStatus('Hadir')">Hadir</button><button type="button" class="seg off" id="sgT" onclick="setStatus('Tidak Hadir')">Tidak Hadir</button></div></div>
+<div><label class="lbl">Dokumentasi Drive <span class="font-semibold text-slate-400">(opsional)</span></label>
+<a class="drive-btn" href="https://drive.google.com/drive/folders/1x9htrwbfRa6OvPnz5ffIdTIWyHT4cQSv" target="_blank" rel="noopener noreferrer"><span class="ico" data-drive></span><span>Klik untuk buka folder Drive<br><span class="text-[11px] font-semibold text-slate-400">Opsional, unggah foto kegiatan di sana</span></span></a></div>
+<div class="flex gap-2 pt-1"><button type="button" class="btn-o" onclick="closeSheet()">Batal</button><button class="btn-p flex-1" type="submit">Simpan Kunjungan</button></div>
+</form>
+<form id="fItem" class="space-y-3 hidden" onsubmit="addItem(event)">
+<h3 class="font-extrabold text-base">Tambah Barang</h3>
+<div><label class="lbl">1. Nama Barang</label><input class="inp" id="inName" placeholder="Contoh: Ensiklopedia Sains" required></div>
+<div><label class="lbl">2. Jumlah</label>
+<div class="flex items-center gap-3"><button type="button" class="btn-o !px-5 text-lg" onclick="qty(-1)">−</button><input class="inp text-center" id="inQty" type="number" min="1" value="1" required><button type="button" class="btn-o !px-5 text-lg" onclick="qty(1)">+</button></div></div>
+<div><label class="lbl">3. Kondisi Barang</label><select class="inp" id="inCond"><option>Sangat Baik</option><option>Baik / Layak</option><option>Perlu Perbaikan</option><option>Rusak Ringan</option></select></div>
+<div class="flex gap-2 pt-1"><button type="button" class="btn-o" onclick="closeSheet()">Batal</button><button class="btn-p flex-1" type="submit">Simpan Barang</button></div>
+</form>
+</div></div>
+<div id="toast" class="fixed top-4 inset-x-0 z-50 mx-auto w-max max-w-[90%] bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-full opacity-0 transition pointer-events-none"></div>
+<div id="printModal" class="fixed inset-0 z-50 bg-slate-200 hidden flex-col">
+<div class="text-white px-3 pb-3 flex items-center gap-2 flex-shrink-0" style="padding-top:max(env(safe-area-inset-top),.75rem)">
+<button type="button" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl font-black active:scale-90 transition" onclick="closePrint()" aria-label="Kembali">‹</button>
+<div class="flex-1 min-w-0"><div class="text-[10px] font-bold opacity-80 uppercase tracking-wider">Pratinjau Laporan</div><div class="text-sm font-extrabold truncate">LAPORAN DIV. PERPUSTAKAAN</div></div>
+<button type="button" class="w-10 h-10 rounded-full bg-white/25 flex items-center justify-center text-xl font-black active:scale-90 transition" onclick="closePrint()" aria-label="Tutup">×</button>
+</div>
+<div class="bg-white border-b border-slate-200 px-3 py-2 flex flex-wrap items-center gap-2 flex-shrink-0">
+<select id="mSize" class="inp !w-auto !py-1.5 !px-3 !text-xs" onchange="updatePrint(this)"><option value="A4">A4</option><option value="F4">F4 / Folio</option></select>
+<select id="mOri" class="inp !w-auto !py-1.5 !px-3 !text-xs" onchange="updatePrint(this)"><option value="portrait">Potret</option><option value="landscape">Lanskap</option></select>
+<div class="flex gap-2 flex-1 min-w-[250px]">
+<button type="button" class="btn-p !py-2 !px-3 !text-xs flex-1" onclick="downloadPDF()">PDF</button>
+<button type="button" class="btn-o !py-2 !px-3 !text-xs flex-1" onclick="downloadDocx()">Word</button>
+<button type="button" class="btn-o !py-2 !px-3 !text-xs flex-1" onclick="window.print()">Cetak</button>
+</div></div>
+<div id="pvWrap" class="flex-1 overflow-auto p-3">
+<div id="printArea" style="width:210mm;min-height:297mm;padding:12mm;background:#fff;margin:0 auto;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,.18);color:#111;font-size:11px;line-height:1.35"></div>
+</div></div>
+<script>
+/* ===== DATA SISWA: EDIT SESUAI DATA SEKOLAH ===== */
+const STUDENTS={
+"Kelas 1":["Ahmad Fauzan","Siti Aisyah","Rafi Pratama"],
+"Kelas 2":["Nabila Putri","Zidan Alfarizi"],
+"Kelas 3":["Alya Zahra","Raka Mahendra"],
+"Kelas 4":["Hana Salsabila","Fikri Ramadhan"],
+"Kelas 5":["Aisyah Nur","Dimas Saputra"],
+"Kelas 6":["Khansa Maharani","Bilal Hakim"]};
+const DRIVE='<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>';
+const DRIVE_URL='https://drive.google.com/drive/folders/1x9htrwbfRa6OvPnz5ffIdTIWyHT4cQSv';
+const $=id=>document.getElementById(id),K=Object.keys(STUDENTS);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+let V=ld('pv',[]),I=ld('pi',[]),tab='visit',q='',cls='Semua',status='Hadir';
+const sv=()=>{try{localStorage.setItem('pv',JSON.stringify(V));localStorage.setItem('pi',JSON.stringify(I))}catch(e){}};
+const todayS=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const fd=d=>new Date(d+'T00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;setTimeout(()=>e.style.opacity=0,2200)}
+function go(t){tab=t;const T={visit:'Kunjungan',inv:'Inventaris',rep:'Laporan'};
+for(const k in T){$('p-'+k).classList.toggle('hidden',k!==t);$('n-'+k).classList.toggle('on',k===t)}
+$('title').textContent=T[t];$('fab').style.display=t==='rep'?'none':'';render()}
+function render(){renderVisitors();renderInv();renderReport()}
+function renderChips(){$('chips').innerHTML=['Semua',...K].map(c=>`<button class="chip ${c===cls?'on':''}" onclick="cls='${c}';renderVisitors()">${c}</button>`).join('')}
+function renderVisitors(){renderChips();
+const t=todayS(),td=V.filter(v=>v.date===t);
+$('sToday').textContent=td.length;$('sHadir').textContent=td.filter(v=>v.status==='Hadir').length;$('sItems').textContent=I.reduce((a,b)=>a+b.qty,0);
+const L=V.filter(v=>(cls==='Semua'||v.cls===cls)&&v.name.toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+$('visCount').textContent=L.length+' kunjungan';
+$('visList').innerHTML=L.length?L.map(v=>`<div class="card flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-sky-100 text-indigo-900 font-black flex items-center justify-center flex-shrink-0">${esc(v.name[0])}</div><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(v.name)}</div><div class="text-xs text-slate-400 font-semibold">${esc(v.cls)} · ${fd(v.date)}</div></div><span class="text-[11px] font-extrabold px-2.5 py-1 rounded-full ${v.status==='Hadir'?'text-emerald-600 bg-emerald-50':'text-rose-600 bg-rose-50'}">${v.status==='Hadir'?'Hadir':'Tidak'}</span><a class="dv" href="${DRIVE_URL}" target="_blank" rel="noopener noreferrer" aria-label="Buka Drive">${DRIVE}</a><button class="text-slate-300 text-xl font-black px-1" onclick="del('v',${v.id})" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada data. Tekan tombol + untuk menambah.</div>'}
+function renderInv(){$('iTot').textContent=I.reduce((a,b)=>a+b.qty,0);
+$('invList').innerHTML=I.length?I.map(i=>`<div class="card flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(i.name)}</div><div class="text-xs text-slate-400 font-semibold">${i.qty} unit · ${esc(i.cond)}</div></div><button class="text-slate-300 text-xl font-black px-1" onclick="del('i',${i.id})" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada barang. Tekan tombol + untuk menambah.</div>'}
+function renderReport(){const h=V.filter(v=>v.status==='Hadir').length;
+$('rTot').textContent=V.length;$('rHadir').textContent=h;$('rTidak').textContent=V.length-h;$('rItems').textContent=I.reduce((a,b)=>a+b.qty,0)}
+function del(t,id){if(!confirm('Hapus data ini?'))return;if(t==='v')V=V.filter(x=>x.id!==id);else I=I.filter(x=>x.id!==id);sv();render()}
+function openSheet(w){$('sheetWrap').classList.remove('hidden');$('fVisit').classList.toggle('hidden',w!=='visit');$('fItem').classList.toggle('hidden',w!=='item');
+if(w==='visit'){$('selClass').innerHTML=K.map(k=>`<option>${k}</option>`).join('');$('inDate').value=todayS();fillStudents();setStatus('Hadir')}
+requestAnimationFrame(()=>$('sheet').classList.remove('translate-y-full'))}
+function closeSheet(){$('sheet').classList.add('translate-y-full');setTimeout(()=>$('sheetWrap').classList.add('hidden'),300)}
+function fillStudents(){$('selStudent').innerHTML=(STUDENTS[$('selClass').value]||[]).map(n=>`<option>${esc(n)}</option>`).join('')}
+function setStatus(s){status=s;$('sgH').classList.toggle('on',s==='Hadir');$('sgT').classList.toggle('on',s!=='Hadir')}
+function addVisitor(e){e.preventDefault();const n=$('selStudent').value;if(!n)return toast('Pilih nama siswa');
+V.push({id:Date.now(),cls:$('selClass').value,name:n,date:$('inDate').value||todayS(),status});sv();closeSheet();render();toast('Kunjungan tersimpan')}
+function qty(d){const e=$('inQty');e.value=Math.max(1,(+e.value||1)+d)}
+function addItem(e){e.preventDefault();I.push({id:Date.now(),name:$('inName').value.trim(),qty:Math.max(1,+$('inQty').value||1),cond:$('inCond').value});
+$('inName').value='';$('inQty').value=1;sv();closeSheet();render();toast('Barang tersimpan')}
+/* ===== LAPORAN ===== */
+function reportHTML(){const L=[...V].sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id),h=V.filter(v=>v.status==='Hadir').length;
+const logo=$('logoImg').src,tgl=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+return `<div style="display:flex;align-items:center;gap:12px;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px"><img src="${logo}" style="width:56px;height:56px;object-fit:contain"><div style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">SD AL BASYIR</div><div style="font-size:13px;font-weight:800">LAPORAN DIV. PERPUSTAKAAN</div><div style="font-size:10px">Tahun Ajaran 2026/2027</div></div></div>
+<p style="margin:0 0 6px"><b>A. Rekap Kunjungan</b> (Total ${V.length} · Hadir ${h} · Tidak hadir ${V.length-h})</p>
+<table><thead><tr><th style="width:8%">No</th><th style="width:20%">Tanggal</th><th>Nama Siswa</th><th style="width:16%">Kelas</th><th style="width:18%">Status</th></tr></thead><tbody>${L.length?L.map((v,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${fd(v.date)}</td><td>${esc(v.name)}</td><td style="text-align:center">${esc(v.cls)}</td><td style="text-align:center">${v.status}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center">Belum ada data</td></tr>'}</tbody></table>
+<p style="margin:0 0 6px"><b>B. Inventaris Perpustakaan</b></p>
+<table><thead><tr><th style="width:8%">No</th><th>Nama Barang</th><th style="width:16%">Jumlah</th><th style="width:28%">Kondisi</th></tr></thead><tbody>${I.length?I.map((x,i)=>`<tr><td style="text-align:center">${i+1}</td><td>${esc(x.name)}</td><td style="text-align:center">${x.qty}</td><td style="text-align:center">${esc(x.cond)}</td></tr>`).join(''):'<tr><td colspan="4" style="text-align:center">Belum ada data</td></tr>'}</tbody></table>
+<div style="margin-top:24px;margin-left:60%;text-align:center;break-inside:avoid"><div>${tgl}</div><div>Staf Perpustakaan,</div><div style="height:56px"></div><div style="font-weight:800;text-decoration:underline">Farasita Nurmahfudzah, S.Hum., Gr.</div></div>`}
+function updatePrint(el){const s=el.id==='paperSize'||el.id==='mSize'?el.value:$('paperSize').value,o=el.id==='paperOri'||el.id==='mOri'?el.value:$('paperOri').value;
+$('paperSize').value=$('mSize').value=s;$('paperOri').value=$('mOri').value=o;applyPaper()}
+function applyPaper(){const s=$('paperSize').value,o=$('paperOri').value;let w=s==='A4'?210:215,h=s==='A4'?297:330;if(o==='landscape')[w,h]=[h,w];
+$('pageStyle').textContent=`@page{size:${w}mm ${h}mm;margin:12mm}`;const p=$('printArea');p.style.width=w+'mm';p.style.minHeight=h+'mm';
+p.style.zoom=Math.min(1,(innerWidth-24)/(w*3.78))}
+function openPrint(){$('printArea').innerHTML=reportHTML();applyPaper();const m=$('printModal');m.classList.remove('hidden');m.classList.add('flex')}
+function closePrint(){const m=$('printModal');m.classList.add('hidden');m.classList.remove('flex')}
+function downloadPDF(){openPrint();toast('Pilih "Simpan sebagai PDF" di dialog cetak');setTimeout(()=>window.print(),500)}
+function downloadDocx(){const h=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%}td,th{border:1px solid #777;padding:4px;font-size:11px}th{background:#eceef3}</style></head><body style="font-family:Arial;font-size:12px">${reportHTML()}</body></html>`;
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff',h],{type:'application/msword'}));a.download='Laporan-Perpustakaan-SD-Al-Basyir.doc';document.body.appendChild(a);a.click();a.remove();toast('File Word diunduh')}
+document.querySelectorAll('[data-drive]').forEach(e=>e.innerHTML=DRIVE);
+addEventListener('resize',()=>{if(!$('printModal').classList.contains('hidden'))applyPaper()});
+go('visit');
+</script>
+</body>
+</html>
