@@ -8,6 +8,21 @@
 <title>Perpustakaan - SD Al Basyir</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey:            "GANTI_API_KEY",
+    authDomain:        "div-perpustakaan.firebaseapp.com",
+    databaseURL:       "https://div-perpustakaan-default-rtdb.firebaseio.com",
+    projectId:         "div-perpustakaan",
+    storageBucket:     "div-perpustakaan.appspot.com",
+    messagingSenderId: "GANTI_SENDER_ID",
+    appId:             "GANTI_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 <style id="pageStyle">@page{size:A4 portrait;margin:12mm}</style>
 <style>
 body{font-family:'Quicksand',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
@@ -195,9 +210,19 @@ const DRIVE='<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width
 const DRIVE_URL='https://drive.google.com/drive/folders/1x9htrwbfRa6OvPnz5ffIdTIWyHT4cQSv';
 const $=id=>document.getElementById(id),K=Object.keys(STUDENTS);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
-let V=ld('pv',[]),I=ld('pi',[]),tab='visit',q='',cls='Semua',status='Hadir';
-const sv=()=>{try{localStorage.setItem('pv',JSON.stringify(V));localStorage.setItem('pi',JSON.stringify(I))}catch(e){}};
+/* ===== FIREBASE REAL-TIME ===== */
+let V=[],I=[],tab='visit',q='',cls='Semua',status='Hadir';
+const sv=()=>{};
+db.ref('kunjungan').on('value',s=>{
+  const d=s.val()||{};
+  V=Object.entries(d).map(([k,v])=>Object.assign({},v,{fbKey:k}));
+  render();
+});
+db.ref('inventaris').on('value',s=>{
+  const d=s.val()||{};
+  I=Object.entries(d).map(([k,v])=>Object.assign({},v,{fbKey:k}));
+  render();
+});
 const todayS=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const fd=d=>new Date(d+'T00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
 function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;setTimeout(()=>e.style.opacity=0,2200)}
@@ -209,14 +234,16 @@ function renderChips(){$('chips').innerHTML=['Semua',...K].map(c=>`<button class
 function renderVisitors(){renderChips();
 const t=todayS(),td=V.filter(v=>v.date===t);
 $('sToday').textContent=td.length;$('sHadir').textContent=td.filter(v=>v.status==='Hadir').length;$('sItems').textContent=I.reduce((a,b)=>a+b.qty,0);
-const L=V.filter(v=>(cls==='Semua'||v.cls===cls)&&v.name.toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+const L=V.filter(v=>(cls==='Semua'||v.cls===cls)&&v.name.toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date)||(b.id||0)-(a.id||0));
 $('visCount').textContent=L.length+' kunjungan';
-$('visList').innerHTML=L.length?L.map(v=>`<div class="card flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-sky-100 text-indigo-900 font-black flex items-center justify-center flex-shrink-0">${esc(v.name[0])}</div><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(v.name)}</div><div class="text-xs text-slate-400 font-semibold">${esc(v.cls)} · ${fd(v.date)}</div></div><span class="text-[11px] font-extrabold px-2.5 py-1 rounded-full ${v.status==='Hadir'?'text-emerald-600 bg-emerald-50':'text-rose-600 bg-rose-50'}">${v.status==='Hadir'?'Hadir':'Tidak'}</span><a class="dv" href="${DRIVE_URL}" target="_blank" rel="noopener noreferrer" aria-label="Buka Drive">${DRIVE}</a><button class="text-slate-300 text-xl font-black px-1" onclick="del('v',${v.id})" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada data. Tekan tombol + untuk menambah.</div>'}
+$('visList').innerHTML=L.length?L.map(v=>`<div class="card flex items-center gap-3"><div class="w-10 h-10 rounded-2xl bg-sky-100 text-indigo-900 font-black flex items-center justify-center flex-shrink-0">${esc(v.name[0])}</div><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(v.name)}</div><div class="text-xs text-slate-400 font-semibold">${esc(v.cls)} · ${fd(v.date)}</div></div><span class="text-[11px] font-extrabold px-2.5 py-1 rounded-full ${v.status==='Hadir'?'text-emerald-600 bg-emerald-50':'text-rose-600 bg-rose-50'}">${v.status==='Hadir'?'Hadir':'Tidak'}</span><a class="dv" href="${DRIVE_URL}" target="_blank" rel="noopener noreferrer" aria-label="Buka Drive">${DRIVE}</a><button class="text-slate-300 text-xl font-black px-1" onclick="del('v','${v.fbKey}')" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada data. Tekan tombol + untuk menambah.</div>'}
 function renderInv(){$('iTot').textContent=I.reduce((a,b)=>a+b.qty,0);
-$('invList').innerHTML=I.length?I.map(i=>`<div class="card flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(i.name)}</div><div class="text-xs text-slate-400 font-semibold">${i.qty} unit · ${esc(i.cond)}</div></div><button class="text-slate-300 text-xl font-black px-1" onclick="del('i',${i.id})" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada barang. Tekan tombol + untuk menambah.</div>'}
+$('invList').innerHTML=I.length?I.map(i=>`<div class="card flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-extrabold text-sm truncate">${esc(i.name)}</div><div class="text-xs text-slate-400 font-semibold">${i.qty} unit · ${esc(i.cond)}</div></div><button class="text-slate-300 text-xl font-black px-1" onclick="del('i','${i.fbKey}')" aria-label="Hapus">×</button></div>`).join(''):'<div class="card text-center text-sm font-bold text-slate-400">Belum ada barang. Tekan tombol + untuk menambah.</div>'}
 function renderReport(){const h=V.filter(v=>v.status==='Hadir').length;
 $('rTot').textContent=V.length;$('rHadir').textContent=h;$('rTidak').textContent=V.length-h;$('rItems').textContent=I.reduce((a,b)=>a+b.qty,0)}
-function del(t,id){if(!confirm('Hapus data ini?'))return;if(t==='v')V=V.filter(x=>x.id!==id);else I=I.filter(x=>x.id!==id);sv();render()}
+function del(t,fbKey){if(!confirm('Hapus data ini?'))return;
+if(t==='v')db.ref('kunjungan/'+fbKey).remove();
+else db.ref('inventaris/'+fbKey).remove()}
 function openSheet(w){$('sheetWrap').classList.remove('hidden');$('fVisit').classList.toggle('hidden',w!=='visit');$('fItem').classList.toggle('hidden',w!=='item');
 if(w==='visit'){$('selClass').innerHTML=K.map(k=>`<option>${k}</option>`).join('');$('inDate').value=todayS();fillStudents();setStatus('Hadir')}
 requestAnimationFrame(()=>$('sheet').classList.remove('translate-y-full'))}
@@ -224,12 +251,14 @@ function closeSheet(){$('sheet').classList.add('translate-y-full');setTimeout(()
 function fillStudents(){$('selStudent').innerHTML=(STUDENTS[$('selClass').value]||[]).map(n=>`<option>${esc(n)}</option>`).join('')}
 function setStatus(s){status=s;$('sgH').classList.toggle('on',s==='Hadir');$('sgT').classList.toggle('on',s!=='Hadir')}
 function addVisitor(e){e.preventDefault();const n=$('selStudent').value;if(!n)return toast('Pilih nama siswa');
-V.push({id:Date.now(),cls:$('selClass').value,name:n,date:$('inDate').value||todayS(),status});sv();closeSheet();render();toast('Kunjungan tersimpan')}
+db.ref('kunjungan').push({id:Date.now(),cls:$('selClass').value,name:n,date:$('inDate').value||todayS(),status:status});
+closeSheet();toast('Kunjungan tersimpan')}
 function qty(d){const e=$('inQty');e.value=Math.max(1,(+e.value||1)+d)}
-function addItem(e){e.preventDefault();I.push({id:Date.now(),name:$('inName').value.trim(),qty:Math.max(1,+$('inQty').value||1),cond:$('inCond').value});
-$('inName').value='';$('inQty').value=1;sv();closeSheet();render();toast('Barang tersimpan')}
+function addItem(e){e.preventDefault();
+db.ref('inventaris').push({id:Date.now(),name:$('inName').value.trim(),qty:Math.max(1,+$('inQty').value||1),cond:$('inCond').value});
+$('inName').value='';$('inQty').value=1;closeSheet();toast('Barang tersimpan')}
 /* ===== LAPORAN ===== */
-function reportHTML(){const L=[...V].sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id),h=V.filter(v=>v.status==='Hadir').length;
+function reportHTML(){const L=[...V].sort((a,b)=>a.date.localeCompare(b.date)||(a.id||0)-(b.id||0)),h=V.filter(v=>v.status==='Hadir').length;
 const logo=$('logoImg').src,tgl=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
 return `<div style="display:flex;align-items:center;gap:12px;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px"><img src="${logo}" style="width:56px;height:56px;object-fit:contain"><div style="flex:1;text-align:center"><div style="font-size:15px;font-weight:800">SD AL BASYIR</div><div style="font-size:13px;font-weight:800">LAPORAN DIV. PERPUSTAKAAN</div><div style="font-size:10px">Tahun Ajaran 2026/2027</div></div></div>
 <p style="margin:0 0 6px"><b>A. Rekap Kunjungan</b> (Total ${V.length} · Hadir ${h} · Tidak hadir ${V.length-h})</p>
